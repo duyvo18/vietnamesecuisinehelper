@@ -12,11 +12,12 @@
         android:id="@+id/Img_WelcomeImage"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/Btn_ToCamera"
-        app:layout_constraintVertical_weight="6"
-        android:layout_marginHorizontal="70dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="50dp"
-        android:src="@color/black"/>
+        app:layout_constraintVertical_weight="5"
+        android:layout_marginHorizontal="50dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:src="@drawable/trong_dong_dong_son"
+        android:scaleType="fitCenter"/>
 
     <Button
         android:layout_width="match_parent"
