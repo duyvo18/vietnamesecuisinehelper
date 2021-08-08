@@ -24,13 +24,17 @@ public class MainActivity extends AppCompatActivity {
                 dispatchTakePictureIntent();
                 break;
             case R.id.Btn_ToGallery:
-                // TODO: Open Gallery to select picture
                 choosePictureGallery();
                 break;
             case R.id.Btn_ToList:
-                // TODO: Open list of Vietnamese food
+                // TODO: Replace tmp function
+                tmpFuncForMapActivityTesting();
                 break;
         }
+    }
+
+    private void tmpFuncForMapActivityTesting() {
+        startActivity(new Intent(this, MapActivity.class));
     }
 
     private void choosePictureGallery() {
