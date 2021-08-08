@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class ImageChoose extends AppCompatActivity {
 
-    ImageView imageView = findViewById(R.id.imageView);
     private static final int GALLERY_REQUEST_CODE = 123;
 
     @Override
@@ -21,14 +20,16 @@ public class ImageChoose extends AppCompatActivity {
         Intent intentImage = new Intent();
         intentImage.setType("image/*");
         intentImage.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intentImage, "Choose image"), GALLERY_REQUEST_CODE);
+        startActivityForResult(Intent.createChooser(intentImage, "Choose image"),
+                GALLERY_REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GALLERY_REQUEST_CODE && requestCode == RESULT_OK && data != null) {
+        if (requestCode == GALLERY_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             Uri imageData = data.getData();
+            ImageView imageView = findViewById(R.id.imageView);
             imageView.setImageURI(imageData);
         }
     }

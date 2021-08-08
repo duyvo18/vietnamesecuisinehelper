@@ -1,24 +1,12 @@
 package com.example.vietnamesecuisinehelper;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Toast;
-
-import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
         switch(view.getId())
         {
             case R.id.Btn_ToCamera:
-                // TODO: Open camera to take new picture
                 dispatchTakePictureIntent();
                 break;
             case R.id.Btn_ToGallery:
