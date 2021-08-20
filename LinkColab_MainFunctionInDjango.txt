@@ -1,0 +1,22 @@
+*Colab:
+https://colab.research.google.com/drive/1bPQVpzznatbxSKG6cffcl0DXXz3z-zbQ?usp=sharing
+
+*Django:
+def handle_uploaded_file(f):
+    filename = datetime.now().strftime('%Y%m%d%H%M%S')
+    with open('files/%s.jpg'%(filename), 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+        return filename
+
+
+def returnfoodname(request):
+    if request.method=='POST':
+        img = request.FILES['image']
+        handle_uploaded_file(img)
+        imageName = "files/" + handle_uploaded_file(img) + ".jpg"
+        with open(imageName,'rb+') as destination:
+            str = requests.post('http://2205215d8ee9.ngrok.io/get', files={'image':destination}).text
+            return HttpResponse(str)
+    return HttpResponse('Method does not support!')
+    pass
