@@ -86,7 +86,7 @@ public class ImageChoose extends AppCompatActivity {
             filePath = picUri.getPath();
             if (filePath != null) {
                 try {
-                    textView.setText("File Selectedd");
+                    textView.setText("File Selected");
                     Log.d("@@@ filePath", String.valueOf(filePath));
                     bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), picUri);
                     uploadBitmap(bitmap);

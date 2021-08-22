@@ -17,7 +17,7 @@
             android:layout_height="200dp" />
         <TextView
             android:id="@+id/textview"
-            android:hint="NO Image Slected"
+            android:hint="NO Image Selected"
             android:layout_gravity="center"
             android:gravity="center_horizontal"
             android:textStyle="bold"

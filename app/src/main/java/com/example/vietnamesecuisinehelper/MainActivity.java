@@ -4,21 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
-
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.toolbox.Volley;
-
-import java.io.ByteArrayOutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,13 +28,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.Btn_ToList:
                 // TODO: Replace tmp function
-                tmpFuncForMapActivityTesting();
                 break;
         }
-    }
-
-    private void tmpFuncForMapActivityTesting() {
-        startActivity(new Intent(this, MapActivity.class));
     }
 
     private void choosePictureGallery() {
