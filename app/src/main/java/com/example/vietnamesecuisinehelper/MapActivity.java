@@ -50,12 +50,6 @@ public class MapActivity extends AppCompatActivity
      */
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 150;
 
-    /**
-     * Flag indicating whether a requested permission has been denied after returning in
-     * {@link #onRequestPermissionsResult(int, String[], int[])}.
-     */
-    private boolean permissionDenied = false;
-
     private GoogleMap map;
 
     @Override
@@ -104,25 +98,14 @@ public class MapActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-        if (permissionDenied) {
-            showMissingPermissionError();
-            permissionDenied = false;
-        }
-    }
-
     private void showMissingPermissionError() {
         Toast.makeText(this, "Location permission is missing", Toast.LENGTH_LONG).show();
     }
 
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            if (map != null) {
-                map.setMyLocationEnabled(true);
-            }
+                == PackageManager.PERMISSION_GRANTED && map != null) {
+            map.setMyLocationEnabled(true);
         }
     }
 }
