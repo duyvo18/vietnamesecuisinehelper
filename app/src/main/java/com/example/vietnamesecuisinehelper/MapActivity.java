@@ -40,8 +40,6 @@ import android.widget.Toast;
  */
 public class MapActivity extends AppCompatActivity
         implements
-        OnMyLocationButtonClickListener,
-        OnMyLocationClickListener,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -50,7 +48,7 @@ public class MapActivity extends AppCompatActivity
      *
      * @see #onRequestPermissionsResult(int, String[], int[])
      */
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 150;
 
     /**
      * Flag indicating whether a requested permission has been denied after returning in
@@ -73,34 +71,21 @@ public class MapActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        map.setOnMyLocationButtonClickListener(this);
-        map.setOnMyLocationClickListener(this);
-        enableMyLocation();
+        requestLocationPermission();
     }
 
-    /**
-     * Enables the My Location layer if the fine location permission has been granted.
-     */
-    private void enableMyLocation() {
+    private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            if (map != null) {
-                map.setMyLocationEnabled(true);
-            }
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
         }
-    }
-
-    @Override
-    public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
-        return false;
-    }
-
-    @Override
-    public void onMyLocationClick(@NonNull Location location) {
-        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+        else
+        {
+            enableMyLocation();
+        }
     }
 
     @Override
@@ -113,12 +98,9 @@ public class MapActivity extends AppCompatActivity
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            // Enable the my location layer if the permission has been granted.
             enableMyLocation();
         } else {
-            // Permission was denied. Display an error message
-            // Display the missing permission error dialog when the fragments resume.
-            permissionDenied = true;
+            showMissingPermissionError();
         }
     }
 
@@ -126,17 +108,21 @@ public class MapActivity extends AppCompatActivity
     protected void onResumeFragments() {
         super.onResumeFragments();
         if (permissionDenied) {
-            // Permission was not granted, display error dialog.
             showMissingPermissionError();
             permissionDenied = false;
         }
     }
 
-    /**
-     * Displays a dialog with error message explaining that the location permission is missing.
-     */
     private void showMissingPermissionError() {
         Toast.makeText(this, "Location permission is missing", Toast.LENGTH_LONG).show();
     }
 
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (map != null) {
+                map.setMyLocationEnabled(true);
+            }
+        }
+    }
 }

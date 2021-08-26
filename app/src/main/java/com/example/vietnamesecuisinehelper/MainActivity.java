@@ -28,8 +28,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.Btn_ToList:
                 // TODO: Replace tmp function
+                tmpMapTest();
                 break;
         }
+    }
+
+    private void tmpMapTest() {
+        startActivity(new Intent(this, MapActivity.class));
     }
 
     private void choosePictureGallery() {
