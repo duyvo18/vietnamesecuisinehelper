@@ -9,7 +9,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 
-import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,7 +35,7 @@ public class VolleyMultipartRequest extends Request<NetworkResponse> {
         this.mErrorListener = errorListener;
     }
 
-    public String tmpp(){
+    public String tmp(){
         //JSONObject obj = new JSONObject(new String(mListener.onResponse(""));
         //Toast.makeText(this,
         //      obj.getString("message"), Toast.LENGTH_SHORT).show();

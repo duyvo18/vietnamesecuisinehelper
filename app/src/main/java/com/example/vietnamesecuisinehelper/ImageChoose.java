@@ -135,7 +135,7 @@ public class ImageChoose extends AppCompatActivity {
             filePath = picUri.getPath();
             if (filePath != null) {
                 try {
-                    textView.setText("File Selectedd");
+                    textView.setText("File Selected");
                     Log.d("@@@ filePath", String.valueOf(filePath));
                     bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), picUri);
                     imageView.setImageBitmap(bitmap);
@@ -196,5 +196,11 @@ public class ImageChoose extends AppCompatActivity {
         };
         Volley.newRequestQueue(getApplicationContext()).add(volleyMultipartRequest);
         Toast.makeText(this,"returnfoodname",Toast.LENGTH_SHORT).show();
+    }
+
+    public void onClickMapBtn(View view) {
+        // TODO: replace with actual result
+        startActivity(new Intent(this, MapActivity.class)
+        .putExtra("food_name", "hu_tieu"));
     }
 }
