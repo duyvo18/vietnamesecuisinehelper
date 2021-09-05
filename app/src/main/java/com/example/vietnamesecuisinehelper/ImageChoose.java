@@ -1,13 +1,16 @@
 package com.example.vietnamesecuisinehelper;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,10 +35,15 @@ public class ImageChoose extends AppCompatActivity {
     private static final String ROOT_URL = "http://192.168.1.2:8000/returnfoodname";
     private static final int REQUEST_PERMISSIONS = 100;
     private static final int PICK_IMAGE_REQUEST =1 ;
+    int REQUEST_IMAGE_CAPTURE = 2;
     private Bitmap bitmap;
     private String filePath;
     ImageView imageView;
+    ImageView imgSampleOne;
+    ImageView imgSampleTwo;
+    ImageView imgSampleThree;
     TextView textView;
+    TextView textViewPlaceHolder;
 
     //private static final int GALLERY_REQUEST_CODE = 123;
 
@@ -44,9 +52,31 @@ public class ImageChoose extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.picture_gallery);
         imageView =  findViewById(R.id.imageView);
-        textView =  findViewById(R.id.textview);
+        textView =  findViewById(R.id.recognitionName1);
+        textViewPlaceHolder = (TextView) findViewById(R.id.tvPlaceholder);
+        imgSampleOne = findViewById(R.id.imgSampleOne);
+        imgSampleTwo = findViewById(R.id.imgSampleTwo);
+        imgSampleThree = findViewById(R.id.imgSampleThree);
 
-        findViewById(R.id.buttonUploadImage).setOnClickListener(view -> {
+        imgSampleOne.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadSingleImage(imgSampleOne);
+            }
+        });
+        imgSampleTwo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadSingleImage(imgSampleTwo);
+            }
+        });
+        imgSampleThree.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadSingleImage(imgSampleThree);
+            }
+        });
+        findViewById(R.id.gallery).setOnClickListener(view -> {
             if ((ContextCompat.checkSelfPermission(getApplicationContext(),
                     Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
                     && (ContextCompat.checkSelfPermission(getApplicationContext(),
@@ -67,8 +97,27 @@ public class ImageChoose extends AppCompatActivity {
                 showFileChooser();
             }
         });
+
+        findViewById(R.id.captureImageFab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                try {
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                } catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
+    private  void uploadSingleImage(ImageView imageView1){
+        BitmapDrawable drawable = (BitmapDrawable) imageView1.getDrawable();
+        bitmap = drawable.getBitmap();
+        imageView.setImageBitmap(bitmap);
+        textViewPlaceHolder.setVisibility(View.INVISIBLE);
+        uploadImage(bitmap);
+    }
     private void showFileChooser() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -89,9 +138,11 @@ public class ImageChoose extends AppCompatActivity {
                     textView.setText("File Selected");
                     Log.d("@@@ filePath", String.valueOf(filePath));
                     bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), picUri);
-                    uploadBitmap(bitmap);
                     imageView.setImageBitmap(bitmap);
+                    textViewPlaceHolder.setVisibility(View.INVISIBLE);
+                    uploadImage(bitmap);
                 } catch (IOException e) {
+                    Toast.makeText(this,"http://192.168.1.2:8000/returnfoodname",Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
             }
@@ -100,33 +151,38 @@ public class ImageChoose extends AppCompatActivity {
                 Toast.makeText(ImageChoose.this,"no image selected",
                         Toast.LENGTH_LONG).show();
             }
+        }else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK
+                && data != null ){
+            Bundle bundle = data.getExtras();
+            bitmap = (Bitmap) bundle.get("data");
+            textView.setText("File Selected");
+            imageView.setImageBitmap(bitmap);
+            textViewPlaceHolder.setVisibility(View.INVISIBLE);
+            uploadImage(bitmap);
         }
     }
-
     public byte[] getFileDataFromDrawable(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         return byteArrayOutputStream.toByteArray();
-    }
-
-    private void uploadBitmap(final Bitmap bitmap) {
+    }//javx.net.ssl.SSLHandshakeException: Handshake failed
+    public void uploadImage(Bitmap bitmap) {
         VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(
-                Request.Method.POST, ROOT_URL,
+                Request.Method.POST, "http://192.168.1.7:8000/returnfoodname",
                 new Response.Listener<NetworkResponse>() {
                     @Override
                     public void onResponse(NetworkResponse response) {
                         try {
                             textView.setText(new String(response.data));
+                            Toast.makeText(getApplicationContext(),"Upload Successfully!",Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
+                            Toast.makeText(getApplicationContext(),"Upload Failed!",Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
-                            textView.setText("Wrong in the process of response!");
                         }
                     }
-                },
+                },//11.155.252.101
                 error -> {
-                    Toast.makeText(getApplicationContext(), error.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                    Log.e("GotError", "" + error.getMessage());
+                    Toast.makeText(this,"GotError: " + error.getMessage(), Toast.LENGTH_LONG).show();
                 })
         {
             @Override
@@ -138,6 +194,7 @@ public class ImageChoose extends AppCompatActivity {
                 return params;
             }
         };
-        Volley.newRequestQueue(this).add(volleyMultipartRequest);
+        Volley.newRequestQueue(getApplicationContext()).add(volleyMultipartRequest);
+        Toast.makeText(this,"returnfoodname",Toast.LENGTH_SHORT).show();
     }
 }
