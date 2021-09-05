@@ -197,4 +197,10 @@ public class ImageChoose extends AppCompatActivity {
         Volley.newRequestQueue(getApplicationContext()).add(volleyMultipartRequest);
         Toast.makeText(this,"returnfoodname",Toast.LENGTH_SHORT).show();
     }
+
+    public void onClickMapBtn(View view) {
+        // TODO: replace with actual result
+        startActivity(new Intent(this, MapActivity.class)
+        .putExtra("food_name", "hu_tieu"));
+    }
 }

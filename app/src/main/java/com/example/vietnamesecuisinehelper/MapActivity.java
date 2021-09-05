@@ -15,38 +15,45 @@
 
 package com.example.vietnamesecuisinehelper;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMyLocationClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.CancellationToken;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnTokenCanceledListener;
+import com.google.android.gms.tasks.Task;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
+import java.util.ArrayList;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.INTERNET;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This demo shows how GMS Location can be used to check for changes to the users location.  The
@@ -54,34 +61,19 @@ import java.util.Map;
  * Permission for {@link android.Manifest.permission#ACCESS_FINE_LOCATION} is requested at run
  * time. If the permission has not been granted, the Activity is finished with an error message.
  */
-public class MapActivity extends AppCompatActivity
-        implements
-        OnMyLocationButtonClickListener,
-        OnMyLocationClickListener,
+public class MapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    /**
-     * Request code for location permission request.
-     *
-     * @see #onRequestPermissionsResult(int, String[], int[])
-     */
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
-    private static final int FIND_PLACE_REQUEST_CODE = 200;
-
-    String PLACES_API_BASE_URL =
-            "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?";
-
-    /**
-     * Flag indicating whether a requested permission has been denied after returning in
-     * {@link #onRequestPermissionsResult(int, String[], int[])}.
-     */
-    private boolean permissionDenied = false;
+    private static final int ALL_PERMISSION_REQUEST_CODE = 100;
 
     private GoogleMap map;
     private FusedLocationProviderClient fusedLocationClient;
 
+
     String food_name;
+
+    ArrayList<String> deniedPermissions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,143 +87,201 @@ public class MapActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        askForPermissions();
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        map.setOnMyLocationButtonClickListener(this);
-        map.setOnMyLocationClickListener(this);
-        enableMyLocation();
-        searchForNearbyRestaurant();
     }
 
-    private void searchForNearbyRestaurant() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            showMissingPermissionError();
+    private void askForPermissions() {
+        ActivityCompat.requestPermissions(this,
+                getPermissionList(), ALL_PERMISSION_REQUEST_CODE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode != ALL_PERMISSION_REQUEST_CODE) {
             return;
         }
-        final Location[] curLoc = new Location[1];
 
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+        getDeniedPermissions();
+    }
+
+    private void getDeniedPermissions() {
+        deniedPermissions = new ArrayList<>();
+
+        for (String permission : getPermissionList()) {
+            if (ActivityCompat.checkSelfPermission(this, permission) ==
+                    PackageManager.PERMISSION_DENIED) {
+                deniedPermissions.add(permission);
+            }
+        }
+    }
+
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+
+        if (deniedPermissions == null)
+        {
+            return;
+        }
+        else if (deniedPermissions.size() > 0)
+        {
+            showMissingPermissionsError(deniedPermissions);
+        }
+        else
+        {
+            enableMyLocation();
+            searchForNearbyRestaurant(food_name);
+        }
+    }
+
+
+    private void searchForNearbyRestaurant(String food_name) {
+        if (ActivityCompat.checkSelfPermission(this,
+                ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this,
+                        ACCESS_COARSE_LOCATION) !=
+                        PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+
+        Task<Location> currentLocationTask = fusedLocationClient.getCurrentLocation(
+                LocationRequest.PRIORITY_HIGH_ACCURACY,
+                new CancellationToken() {
                     @Override
-                    public void onSuccess(Location location) {
-                        curLoc[0] = location;
+                    public boolean isCancellationRequested() {
+                        return false;
+                    }
 
-                        if (location != null) {
-                            showMissingPermissionError();
-                        }
+                    @NonNull
+                    @Override
+                    public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                        return null;
                     }
                 });
 
-        String url = PLACES_API_BASE_URL + "input=" + food_name.toLowerCase(Locale.ROOT) +
-                "&inputtype=textquery" +
-                "&fields=name%2Cformatted_address%2Cgeometry" +
-                "&locationbias=circle:2000@" +
-                curLoc[0].getLatitude() + "%2C" + curLoc[0].getLongitude() +
-                "&key=AIzaSyAMCmyPwxfSMzksFw0jkMG_PcU9frcUIHg";
-
-        Log.d("@@@ requestFindPlace", String.valueOf(url));
-
-        VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(
-                Request.Method., url,
-                new Response.Listener<NetworkResponse>() {
-                    @Override
-                    public void onResponse(NetworkResponse response) {
-                        try {
-                            // TODO: set up result markers
-                            //textView.setText(new String(response.data));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            //textView.setText("Wrong in the process of response!");
-                        }
-                    }
-                },
-                error -> {
-                    Toast.makeText(getApplicationContext(), error.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                    Log.e("GotError", "" + error.getMessage());
-                })
-        {
+        currentLocationTask.addOnCompleteListener(new OnCompleteListener<Location>() {
             @Override
-            protected Map<String, DataPart> getByteData() {
-                Map<String, DataPart> params = new HashMap<>();
-                long imageName = System.currentTimeMillis();
-                params.put("image", new DataPart(imageName + ".png",
-                        getFileDataFromDrawable(bitmap)));
-                return params;
+            public void onComplete(@NonNull Task<Location> task) {
+                if (task.isSuccessful()) {
+                    sendRequestToServer(food_name, (Location) task.getResult());
+                }
             }
-        };
-        Volley.newRequestQueue(this).add(volleyMultipartRequest);
+        });
+    }
+
+    private void sendRequestToServer(String food_name, Location curLoc) {
+        StringBuilder urlBuilder = new StringBuilder(
+                "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?");
+
+        urlBuilder.append("input=").append(food_name);
+        urlBuilder.append("&inputtype=").append("textquery");
+        urlBuilder.append("&fields=").append("formatted_address,name,rating,geometry");
+        urlBuilder.append("&locationbias=").append("circle:5000")
+                .append("@").append(curLoc.getLatitude())
+                .append(",").append(curLoc.getLongitude());
+        urlBuilder.append("&key=").append("AIzaSyAMCmyPwxfSMzksFw0jkMG_PcU9frcUIHg");
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, urlBuilder.toString(),
+                null,
+                new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                parseLocationResult(response);
+            }
+        },
+                new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(),
+                        error + "\n" + error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        Volley.newRequestQueue(this).add(request);
+    }
+
+    private void parseLocationResult(JSONObject result) {
+        String address, name;
+        double rating;
+        double lat, lng;
+
+        try {
+            if (result.getString("status").equalsIgnoreCase("OK")) {
+                JSONArray jsonArray = result.getJSONArray("candidates");
+
+                Toast.makeText(getBaseContext(), jsonArray.length() + " results found!",
+                        Toast.LENGTH_LONG).show();
+
+                map.clear();
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject place = jsonArray.getJSONObject(i);
+
+                    address = place.getString("formatted_address");
+                    name = place.getString("name");
+                    rating = place.getDouble("rating");
+
+                    lat = place.getJSONObject("geometry")
+                            .getJSONObject("location")
+                            .getDouble("lat");
+                    lng = place.getJSONObject("geometry")
+                            .getJSONObject("location")
+                            .getDouble("lng");
+
+                    LatLng latLng = new LatLng(lat, lng);
+
+                    map.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(name)
+                    .snippet(address + "\nRating: " + rating + "/5"));
+                }
+            }
+            else {
+                String message = "Request ended unexpectedly\n" +
+                        "Status: " + result.get("status") + "\n" +
+                        "Message: " + result.get("error_message");
+                Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("gplace", "parseLocationResult: Error=" + e.getMessage());
+        }
     }
 
     /**
      * Enables the My Location layer if the fine location permission has been granted.
      */
     private void enableMyLocation() {
-        // [START maps_check_location_permission]
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             if (map != null) {
                 map.setMyLocationEnabled(true);
             }
-        } else {
-            // Permission to access the location is missing. Show rationale and request permission
-            PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
-                    Manifest.permission.ACCESS_FINE_LOCATION, true);
-        }
-        // [END maps_check_location_permission]
-    }
-
-    @Override
-    public boolean onMyLocationButtonClick() {
-        return false;
-    }
-
-    @Override
-    public void onMyLocationClick(@NonNull Location location) {
-        return;
-    }
-
-    // [START maps_check_location_permission_result]
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
-            return;
-        }
-
-        if (PermissionUtils.isPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            // Enable the my location layer if the permission has been granted.
-            enableMyLocation();
-        } else {
-            // Permission was denied. Display an error message
-            // [START_EXCLUDE]
-            // Display the missing permission error dialog when the fragments resume.
-            permissionDenied = true;
-            // [END_EXCLUDE]
-        }
-    }
-    // [END maps_check_location_permission_result]
-
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-        if (permissionDenied) {
-            // Permission was not granted, display error dialog.
-            showMissingPermissionError();
-            permissionDenied = false;
         }
     }
 
-    /**
-     * Displays a dialog with error message explaining that the location permission is missing.
-     */
-    private void showMissingPermissionError() {
-        PermissionUtils.PermissionDeniedDialog
-                .newInstance(true).show(getSupportFragmentManager(), "dialog");
+    private String[] getPermissionList() {
+        return new String[] {
+                ACCESS_FINE_LOCATION,
+                ACCESS_COARSE_LOCATION,
+                INTERNET
+        };
+    }
+
+    private void showMissingPermissionsError(ArrayList<String> permissionsDenied) {
+        String message = "The following permissions denied: " + permissionsDenied +
+                "\nPlease allow all permissions to runs this task properly";
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }
