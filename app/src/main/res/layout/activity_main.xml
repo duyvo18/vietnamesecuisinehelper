@@ -11,7 +11,7 @@
         android:layout_height="0dp"
         android:id="@+id/Img_WelcomeImage"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/Btn_ToCamera"
+        app:layout_constraintBottom_toTopOf="@id/galleryCamera"
         app:layout_constraintVertical_weight="5"
         android:layout_marginHorizontal="50dp"
         android:layout_marginTop="30dp"
@@ -20,34 +20,22 @@
         android:scaleType="fitCenter"/>
 
     <Button
+        android:id="@+id/galleryCamera"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/Btn_ToCamera"
+        android:layout_marginHorizontal="70dp"
+        android:layout_marginVertical="5dp"
+        android:onClick="OnClickMainMenu"
+        android:text="Gallery and new picture"
+        app:layout_constraintBottom_toTopOf="@+id/Btn_ToList"
         app:layout_constraintTop_toBottomOf="@id/Img_WelcomeImage"
-        app:layout_constraintBottom_toTopOf="@id/Btn_ToGallery"
         app:layout_constraintVertical_weight="1"
-        android:layout_marginHorizontal="70dp"
-        android:layout_marginVertical="5dp"
-        android:text="Take a new picture"
-        android:onClick="OnClickMainMenu"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:id="@+id/Btn_ToGallery"
-        app:layout_constraintTop_toBottomOf="@id/Btn_ToCamera"
-        app:layout_constraintBottom_toTopOf="@id/Btn_ToList"
-        app:layout_constraintVertical_weight="1"
-        android:layout_marginHorizontal="70dp"
-        android:layout_marginVertical="5dp"
-        android:text="Select picture for Gallery"
-        android:onClick="OnClickMainMenu"/>
+        tools:layout_editor_absoluteX="70dp" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:id="@+id/Btn_ToList"
-        app:layout_constraintTop_toBottomOf="@id/Btn_ToGallery"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_weight="1"
         android:layout_marginHorizontal="70dp"

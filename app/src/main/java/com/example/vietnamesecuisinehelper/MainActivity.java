@@ -32,11 +32,7 @@ public class MainActivity extends AppCompatActivity {
     public void OnClickMainMenu(View view) {
         switch(view.getId())
         {
-            case R.id.Btn_ToCamera:
-                dispatchTakePictureIntent();
-                break;
-            case R.id.Btn_ToGallery:
-                // TODO: Open Gallery to select picture
+            case R.id.galleryCamera:
                 choosePictureGallery();
                 break;
             case R.id.Btn_ToList:
@@ -48,18 +44,5 @@ public class MainActivity extends AppCompatActivity {
     private void choosePictureGallery() {
         Intent intent = new Intent(MainActivity.this, ImageChoose.class);
         startActivity(intent);
-    }
-
-
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        try {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-            //startActivity(takePictureIntent);
-        } catch (ActivityNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 }
