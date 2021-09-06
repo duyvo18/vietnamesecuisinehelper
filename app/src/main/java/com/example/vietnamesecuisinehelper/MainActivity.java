@@ -14,7 +14,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    // TODO: Activity transition
     public void OnClickMainMenu(View view) {
         switch(view.getId())
         {
@@ -23,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.Btn_ToList:
                 chooseListFood();
-                // TODO: Open list of Vietnamese food
                 break;
         }
     }
