@@ -25,7 +25,6 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -185,18 +184,15 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     private JsonObjectRequest requestToServer(String food_name, LatLng curLoc) {
-        StringBuilder urlBuilder = new StringBuilder(
-                "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?");
+        String url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?";
 
-        urlBuilder.append("input=").append(food_name);
-        urlBuilder.append("&inputtype=").append("textquery");
-        urlBuilder.append("&fields=").append("formatted_address,name,rating,geometry");
-        urlBuilder.append("&locationbias=").append("circle:5000")
-                .append("@").append(curLoc.latitude)
-                .append(",").append(curLoc.latitude);
-        urlBuilder.append("&key=").append("AIzaSyAMCmyPwxfSMzksFw0jkMG_PcU9frcUIHg");
+        url += "input=" + food_name;
+        url += "&inputtype=textquery";
+        url += "&fields=formatted_address,name,rating,geometry";
+        url += "&locationbias=circle:5000@" + curLoc.latitude + "," + curLoc.longitude;
+        url += "&key=AIzaSyAMCmyPwxfSMzksFw0jkMG_PcU9frcUIHg";
 
-        return new JsonObjectRequest(Request.Method.GET, urlBuilder.toString(),
+        return new JsonObjectRequest(Request.Method.GET, url,
                 null,
                 new Response.Listener<JSONObject>() {
             @Override
@@ -221,9 +217,38 @@ public class MapActivity extends AppCompatActivity implements
         // TODO: Uncomment the following block to test a result JSON returned from Find Place API
         /*
         try {
-            String testJson = "{\"candidates\":[{\"formatted_address\": \"140 George St, The Rocks NSW 2000, Australia\",\"geometry\":{\"location\":{\"lat\": -33.8599358,\"lng\": 151.2090295},\"viewport\":{\"northeast\":{\"lat\":-33.85824377010728,\"lng\":151.2104386798927},\"southwest\":{\"lat\":-33.86094342989272,\"lng\":151.2077390201073}}},\"name\":\"Museum of Contemporary Art Australia\",\"rating\":4.4}],\"status\": \"OK\"}";
+            String testJson =
+                    "{" +
+                            "\"candidates\":" +
+                            "[" +
+                                "{" +
+                                    "\"formatted_address\":" +
+                                        "\"140 George St, The Rocks NSW 2000, Australia\"," +
+                                    "\"geometry\":" +
+                                    "{" +
+                                        "\"location\":" +
+                                            "{\"lat\": -33.8599358,\"lng\": 151.2090295}," +
+                                        "\"viewport\":" +
+                                        "{" +
+                                            "\"northeast\":" +
+                                            "{" +
+                                                "\"lat\":-33.85824377010728," +
+                                                "\"lng\":151.2104386798927" +
+                                            "}," +
+                                            "\"southwest\":" +
+                                            "{" +
+                                                "\"lat\":-33.86094342989272," +
+                                                "\"lng\":151.2077390201073" +
+                                            "}" +
+                                        "}" +
+                                    "}," +
+                                    "\"name\":\"Museum of Contemporary Art Australia\"," +
+                                    "\"rating\":4.4" +
+                                "}" +
+                            "]," +
+                            "\"status\": \"OK\"" +
+                    "}";
             result = new JSONObject(testJson);
-
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -12,14 +12,14 @@ import com.example.vietnamesecuisinehelper.Utilities.RecyclerView.ItemObject;
 import java.util.ArrayList;
 
 public class ListFood extends AppCompatActivity {
-
-    private RecyclerView rcvItems;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_food);
-        rcvItems = findViewById(R.id.rcv_items_china);
+
+        RecyclerView rcvItems = findViewById(R.id.rcv_items_china);
         ItemAdapter itemAdapter = new ItemAdapter(this, getListItems());
+
         rcvItems.setAdapter(itemAdapter);
         rcvItems.setLayoutManager(new LinearLayoutManager(this));
     }

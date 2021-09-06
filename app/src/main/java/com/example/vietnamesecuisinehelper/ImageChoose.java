@@ -151,7 +151,7 @@ public class ImageChoose extends AppCompatActivity {
                 try {
                     textView.setText("File Selected");
 
-                    Log.d("@@@ filePath", String.valueOf(filePath));
+                    Log.d("@@@ filePath", filePath);
 
                     bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), picUri);
                     imageView.setImageBitmap(bitmap);
