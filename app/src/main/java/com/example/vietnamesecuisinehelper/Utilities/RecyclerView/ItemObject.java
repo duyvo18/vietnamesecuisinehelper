@@ -1,4 +1,4 @@
-package com.example.vietnamesecuisinehelper;
+package com.example.vietnamesecuisinehelper.Utilities.RecyclerView;
 
 public class ItemObject {
     private int resourceID;

@@ -1,4 +1,4 @@
-package com.example.vietnamesecuisinehelper;
+package com.example.vietnamesecuisinehelper.Utilities.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +12,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.vietnamesecuisinehelper.MapActivity;
+import com.example.vietnamesecuisinehelper.R;
 import com.ramotion.foldingcell.FoldingCell;
 
 import java.util.ArrayList;

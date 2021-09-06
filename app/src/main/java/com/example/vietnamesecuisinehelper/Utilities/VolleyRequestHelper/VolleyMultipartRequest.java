@@ -1,4 +1,4 @@
-package com.example.vietnamesecuisinehelper;
+package com.example.vietnamesecuisinehelper.Utilities.VolleyRequestHelper;
 
 
 import com.android.volley.AuthFailureError;
@@ -188,7 +188,7 @@ public class VolleyMultipartRequest extends Request<NetworkResponse> {
         dataOutputStream.writeBytes(lineEnd);
     }
 
-    class DataPart {
+    public class DataPart {
         private String fileName;
         private byte[] content;
         private String type;
@@ -196,7 +196,7 @@ public class VolleyMultipartRequest extends Request<NetworkResponse> {
         public DataPart() {
         }
 
-        DataPart(String name, byte[] data) {
+        public DataPart(String name, byte[] data) {
             fileName = name;
             content = data;
         }

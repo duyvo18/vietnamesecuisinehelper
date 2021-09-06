@@ -6,6 +6,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 
+import com.example.vietnamesecuisinehelper.Utilities.RecyclerView.ItemAdapter;
+import com.example.vietnamesecuisinehelper.Utilities.RecyclerView.ItemObject;
+
 import java.util.ArrayList;
 
 public class ListFood extends AppCompatActivity {
