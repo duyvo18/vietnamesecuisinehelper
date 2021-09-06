@@ -199,8 +199,7 @@ public class ImageChoose extends AppCompatActivity {
     }
 
     public void onClickMapBtn(View view) {
-        // TODO: replace with actual result
         startActivity(new Intent(this, MapActivity.class)
-        .putExtra("food_name", "hu_tieu"));
+            .putExtra("food_name", textView.getText().toString()));
     }
 }
