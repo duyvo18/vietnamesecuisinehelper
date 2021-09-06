@@ -254,8 +254,11 @@ public class MapActivity extends AppCompatActivity implements
                         "Status: " + result.get("status") + "\n" +
                         "Message: " + result.get("error_message"));
 
-                Toast.makeText(getBaseContext(), "Find Place request ends unexpectedly",
-                        Toast.LENGTH_SHORT).show();
+                String message = "Find Place request ends unexpectedly\n" +
+                        "Status: " + result.get("status") + "\n" +
+                        "Message: " + result.get("error_message");
+
+                Toast.makeText(getBaseContext(), message, Toast.LENGTH_SHORT).show();
             }
 
         } catch (JSONException e) {
