@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class ImageChoose extends AppCompatActivity {
 
-    private static final String ROOT_URL = "http://192.168.1.2:8000/returnfoodname";
+    private static final String ROOT_URL = "http://192.168.1.7:8000/returnfoodname";
 
     private static final int REQUEST_PERMISSIONS = 100;
     private static final int PICK_IMAGE_REQUEST = 1 ;

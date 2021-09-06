@@ -3,7 +3,7 @@
     package="com.example.vietnamesecuisinehelper">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -14,13 +14,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.VietnameseCuisineHelper">
+        android:theme="@style/Theme.VietnameseCuisineHelper"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".ListFood"
+            android:exported="true" />
 
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAMCmyPwxfSMzksFw0jkMG_PcU9frcUIHg" />
@@ -34,15 +36,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".ImageChoose" android:parentActivityName=".MainActivity">
-
-        </activity>
-
-        <activity android:name=".MapActivity" android:parentActivityName=".ImageChoose">
-
-        </activity>
-
+        <activity
+            android:name=".ImageChoose"
+            android:parentActivityName=".MainActivity"></activity>
+        <activity
+            android:name=".MapActivity"
+            android:parentActivityName=".ImageChoose"></activity>
     </application>
 
 </manifest>

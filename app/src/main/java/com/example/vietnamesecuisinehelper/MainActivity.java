@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
                 choosePictureGallery();
                 break;
             case R.id.Btn_ToList:
+                chooseListFood();
                 // TODO: Open list of Vietnamese food
                 break;
         }
@@ -30,5 +31,10 @@ public class MainActivity extends AppCompatActivity {
     private void choosePictureGallery() {
         Intent intent = new Intent(MainActivity.this, ImageChoose.class);
         startActivity(intent);
+    }
+
+    private void chooseListFood(){
+        Intent intentListFood = new Intent(MainActivity.this, ListFood.class);
+        startActivity(intentListFood);
     }
 }
