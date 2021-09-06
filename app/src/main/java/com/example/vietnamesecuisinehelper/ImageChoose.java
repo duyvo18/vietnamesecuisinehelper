@@ -33,19 +33,20 @@ import java.util.Map;
 public class ImageChoose extends AppCompatActivity {
 
     private static final String ROOT_URL = "http://192.168.1.2:8000/returnfoodname";
+
     private static final int REQUEST_PERMISSIONS = 100;
-    private static final int PICK_IMAGE_REQUEST =1 ;
+    private static final int PICK_IMAGE_REQUEST = 1 ;
     int REQUEST_IMAGE_CAPTURE = 2;
+
     private Bitmap bitmap;
-    private String filePath;
+
     ImageView imageView;
     ImageView imgSampleOne;
     ImageView imgSampleTwo;
     ImageView imgSampleThree;
+    
     TextView textView;
     TextView textViewPlaceHolder;
-
-    //private static final int GALLERY_REQUEST_CODE = 123;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -113,7 +114,7 @@ public class ImageChoose extends AppCompatActivity {
         });
     }
 
-    private  void uploadSingleImage(ImageView imageView1){
+    private void uploadSingleImage(ImageView imageView1){
         BitmapDrawable drawable = (BitmapDrawable) imageView1.getDrawable();
         bitmap = drawable.getBitmap();
 
@@ -129,17 +130,21 @@ public class ImageChoose extends AppCompatActivity {
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
 
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"),
-                PICK_IMAGE_REQUEST);
+        try {
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"),
+                    PICK_IMAGE_REQUEST);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK &&
+                data != null && data.getData() != null) {
             Uri picUri = data.getData();
-            filePath = picUri.getPath();
+            String filePath = picUri.getPath();
 
             if (filePath != null) {
                 try {
@@ -163,7 +168,7 @@ public class ImageChoose extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
             }
         }
-        else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && data != null ){
+        else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && data != null ) {
             Bundle bundle = data.getExtras();
             bitmap = (Bitmap) bundle.get("data");
 
@@ -201,7 +206,7 @@ public class ImageChoose extends AppCompatActivity {
                     }
                 },//11.155.252.101
                 error -> {
-                    Toast.makeText(this,"GotError: " + error.getMessage(),
+                    Toast.makeText(this,"Unexpected response: " + error.getMessage(),
                             Toast.LENGTH_LONG).show();
                 })
         {
@@ -218,8 +223,10 @@ public class ImageChoose extends AppCompatActivity {
             }
         };
 
+        Toast.makeText(this,"Sending image, please wait for response from server...",
+                Toast.LENGTH_LONG).show();
+
         Volley.newRequestQueue(getApplicationContext()).add(volleyMultipartRequest);
-        Toast.makeText(this,"Return food name",Toast.LENGTH_SHORT).show();
     }
 
     public void onClickMapBtn(View view) {
