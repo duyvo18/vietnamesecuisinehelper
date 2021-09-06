@@ -25,6 +25,8 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -154,9 +156,19 @@ public class MapActivity extends AppCompatActivity implements
                 new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
+                        LatLng curLatLng = new LatLng(
+                                task.getResult().getLatitude(),
+                                task.getResult().getLongitude()
+                        );
+
+                        if (task.isSuccessful())
+                        {
+                            map.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(curLatLng, 15)
+                            );
+
                             Volley.newRequestQueue(MapActivity.this.getApplicationContext())
-                                    .add(MapActivity.this.requestToServer(food_name, task.getResult()));
+                                    .add(MapActivity.this.requestToServer(food_name, curLatLng));
                         }
                     }
                 })
@@ -165,14 +177,14 @@ public class MapActivity extends AppCompatActivity implements
                             @Override
                             public void onCanceled() {
                                 Toast.makeText(MapActivity.this.getApplicationContext(),
-                                        "Request failed unexpectedly",Toast.LENGTH_SHORT)
-                                        .show();
+                                        "Find Place request failed unexpectedly",
+                                        Toast.LENGTH_SHORT).show();
                             }
                         }
         );
     }
 
-    private JsonObjectRequest requestToServer(String food_name, Location curLoc) {
+    private JsonObjectRequest requestToServer(String food_name, LatLng curLoc) {
         StringBuilder urlBuilder = new StringBuilder(
                 "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?");
 
@@ -180,8 +192,8 @@ public class MapActivity extends AppCompatActivity implements
         urlBuilder.append("&inputtype=").append("textquery");
         urlBuilder.append("&fields=").append("formatted_address,name,rating,geometry");
         urlBuilder.append("&locationbias=").append("circle:5000")
-                .append("@").append(curLoc.getLatitude())
-                .append(",").append(curLoc.getLongitude());
+                .append("@").append(curLoc.latitude)
+                .append(",").append(curLoc.latitude);
         urlBuilder.append("&key=").append("AIzaSyAMCmyPwxfSMzksFw0jkMG_PcU9frcUIHg");
 
         return new JsonObjectRequest(Request.Method.GET, urlBuilder.toString(),
@@ -242,7 +254,7 @@ public class MapActivity extends AppCompatActivity implements
                         "Status: " + result.get("status") + "\n" +
                         "Message: " + result.get("error_message"));
 
-                Toast.makeText(getBaseContext(), "Request ends unexpectedly",
+                Toast.makeText(getBaseContext(), "Find Place request ends unexpectedly",
                         Toast.LENGTH_SHORT).show();
             }
 
@@ -251,7 +263,8 @@ public class MapActivity extends AppCompatActivity implements
             Log.e("gplace", "parseLocationResult: Error=" + e.getMessage());
 
             Toast.makeText(this,
-                    "Unexpected exception in respond from server", Toast.LENGTH_SHORT).show();
+                    "Unexpected exception in response to Find Place request",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
