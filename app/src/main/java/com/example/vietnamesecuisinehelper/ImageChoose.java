@@ -51,6 +51,7 @@ public class ImageChoose extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.picture_gallery);
+
         imageView =  findViewById(R.id.imageView);
         textView =  findViewById(R.id.recognitionName1);
         textViewPlaceHolder = (TextView) findViewById(R.id.tvPlaceholder);
@@ -76,6 +77,7 @@ public class ImageChoose extends AppCompatActivity {
                 uploadSingleImage(imgSampleThree);
             }
         });
+
         findViewById(R.id.gallery).setOnClickListener(view -> {
             if ((ContextCompat.checkSelfPermission(getApplicationContext(),
                     Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
@@ -114,14 +116,19 @@ public class ImageChoose extends AppCompatActivity {
     private  void uploadSingleImage(ImageView imageView1){
         BitmapDrawable drawable = (BitmapDrawable) imageView1.getDrawable();
         bitmap = drawable.getBitmap();
+
         imageView.setImageBitmap(bitmap);
+
         textViewPlaceHolder.setVisibility(View.INVISIBLE);
+
         uploadImage(bitmap);
     }
+
     private void showFileChooser() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
+
         startActivityForResult(Intent.createChooser(intent, "Select Picture"),
                 PICK_IMAGE_REQUEST);
     }
@@ -133,69 +140,86 @@ public class ImageChoose extends AppCompatActivity {
                 && data != null && data.getData() != null) {
             Uri picUri = data.getData();
             filePath = picUri.getPath();
+
             if (filePath != null) {
                 try {
                     textView.setText("File Selected");
+
                     Log.d("@@@ filePath", String.valueOf(filePath));
+
                     bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), picUri);
                     imageView.setImageBitmap(bitmap);
                     textViewPlaceHolder.setVisibility(View.INVISIBLE);
+
                     uploadImage(bitmap);
                 } catch (IOException e) {
-                    Toast.makeText(this,"http://192.168.1.2:8000/returnfoodname",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, ROOT_URL, Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
             }
             else
             {
-                Toast.makeText(ImageChoose.this,"no image selected",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(ImageChoose.this,"No image selected",
+                        Toast.LENGTH_SHORT).show();
             }
-        }else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK
-                && data != null ){
+        }
+        else if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK && data != null ){
             Bundle bundle = data.getExtras();
             bitmap = (Bitmap) bundle.get("data");
+
             textView.setText("File Selected");
             imageView.setImageBitmap(bitmap);
             textViewPlaceHolder.setVisibility(View.INVISIBLE);
+
             uploadImage(bitmap);
         }
     }
+
     public byte[] getFileDataFromDrawable(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+
         return byteArrayOutputStream.toByteArray();
     }//javx.net.ssl.SSLHandshakeException: Handshake failed
+
     public void uploadImage(Bitmap bitmap) {
         VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(
-                Request.Method.POST, "http://192.168.1.7:8000/returnfoodname",
+                Request.Method.POST, ROOT_URL,
                 new Response.Listener<NetworkResponse>() {
                     @Override
                     public void onResponse(NetworkResponse response) {
                         try {
                             textView.setText(new String(response.data));
-                            Toast.makeText(getApplicationContext(),"Upload Successfully!",Toast.LENGTH_SHORT).show();
-                        } catch (Exception e) {
-                            Toast.makeText(getApplicationContext(),"Upload Failed!",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(),"Upload Successfully!",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        catch (Exception e) {
+                            Toast.makeText(getApplicationContext(),"Upload Failed!",
+                                    Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
                     }
                 },//11.155.252.101
                 error -> {
-                    Toast.makeText(this,"GotError: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this,"GotError: " + error.getMessage(),
+                            Toast.LENGTH_LONG).show();
                 })
         {
             @Override
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
+
                 long imageName = System.currentTimeMillis();
+
                 params.put("image", new DataPart(imageName + ".png",
                         getFileDataFromDrawable(bitmap)));
+
                 return params;
             }
         };
+
         Volley.newRequestQueue(getApplicationContext()).add(volleyMultipartRequest);
-        Toast.makeText(this,"returnfoodname",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this,"Return food name",Toast.LENGTH_SHORT).show();
     }
 
     public void onClickMapBtn(View view) {

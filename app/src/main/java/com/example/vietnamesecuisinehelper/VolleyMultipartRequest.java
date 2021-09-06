@@ -22,7 +22,6 @@ public class VolleyMultipartRequest extends Request<NetworkResponse> {
     private final String lineEnd = "\r\n";
     private final String boundary = "apiclient-" + System.currentTimeMillis();
 
-    public String tmp = "not yet";
     private Response.Listener<NetworkResponse> mListener;
     private Response.ErrorListener mErrorListener;
     private Map<String, String> mHeaders;
@@ -35,12 +34,6 @@ public class VolleyMultipartRequest extends Request<NetworkResponse> {
         this.mErrorListener = errorListener;
     }
 
-    public String tmp(){
-        //JSONObject obj = new JSONObject(new String(mListener.onResponse(""));
-        //Toast.makeText(this,
-        //      obj.getString("message"), Toast.LENGTH_SHORT).show();
-        return "tmp";
-    }
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
         return (mHeaders != null) ? mHeaders : super.getHeaders();

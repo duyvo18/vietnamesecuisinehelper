@@ -1,37 +1,8 @@
-// Copyright 2020 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-
 package com.example.vietnamesecuisinehelper;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.CancellationToken;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnTokenCanceledListener;
-import com.google.android.gms.tasks.Task;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.INTERNET;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -45,22 +16,32 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import java.util.ArrayList;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.Manifest.permission.INTERNET;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.CancellationToken;
+import com.google.android.gms.tasks.OnCanceledListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnTokenCanceledListener;
+import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * This demo shows how GMS Location can be used to check for changes to the users location.  The
- * "My Location" button uses GMS Location to set the blue dot representing the users location.
- * Permission for {@link android.Manifest.permission#ACCESS_FINE_LOCATION} is requested at run
- * time. If the permission has not been granted, the Activity is finished with an error message.
- */
+import java.util.ArrayList;
+
 public class MapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -69,7 +50,6 @@ public class MapActivity extends AppCompatActivity implements
 
     private GoogleMap map;
     private FusedLocationProviderClient fusedLocationClient;
-
 
     String food_name;
 
@@ -164,22 +144,35 @@ public class MapActivity extends AppCompatActivity implements
 
                     @NonNull
                     @Override
-                    public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                    public CancellationToken onCanceledRequested(
+                            @NonNull OnTokenCanceledListener onTokenCanceledListener) {
                         return null;
                     }
                 });
 
-        currentLocationTask.addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if (task.isSuccessful()) {
-                    sendRequestToServer(food_name, (Location) task.getResult());
-                }
-            }
-        });
+        currentLocationTask.addOnCompleteListener(
+                new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            Volley.newRequestQueue(MapActivity.this.getApplicationContext())
+                                    .add(MapActivity.this.requestToServer(food_name, task.getResult()));
+                        }
+                    }
+                })
+                .addOnCanceledListener(
+                        new OnCanceledListener() {
+                            @Override
+                            public void onCanceled() {
+                                Toast.makeText(MapActivity.this.getApplicationContext(),
+                                        "Request failed unexpectedly",Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        }
+        );
     }
 
-    private void sendRequestToServer(String food_name, Location curLoc) {
+    private JsonObjectRequest requestToServer(String food_name, Location curLoc) {
         StringBuilder urlBuilder = new StringBuilder(
                 "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?");
 
@@ -191,7 +184,7 @@ public class MapActivity extends AppCompatActivity implements
                 .append(",").append(curLoc.getLongitude());
         urlBuilder.append("&key=").append("AIzaSyAMCmyPwxfSMzksFw0jkMG_PcU9frcUIHg");
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, urlBuilder.toString(),
+        return new JsonObjectRequest(Request.Method.GET, urlBuilder.toString(),
                 null,
                 new Response.Listener<JSONObject>() {
             @Override
@@ -206,8 +199,6 @@ public class MapActivity extends AppCompatActivity implements
                         error + "\n" + error.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
-        Volley.newRequestQueue(this).add(request);
     }
 
     private void parseLocationResult(JSONObject result) {
@@ -220,7 +211,7 @@ public class MapActivity extends AppCompatActivity implements
                 JSONArray jsonArray = result.getJSONArray("candidates");
 
                 Toast.makeText(getBaseContext(), jsonArray.length() + " results found!",
-                        Toast.LENGTH_LONG).show();
+                        Toast.LENGTH_SHORT).show();
 
                 map.clear();
 
@@ -243,25 +234,27 @@ public class MapActivity extends AppCompatActivity implements
                     map.addMarker(new MarkerOptions()
                     .position(latLng)
                     .title(name)
-                    .snippet(address + "\nRating: " + rating + "/5"));
+                    .snippet(address + "\n" + "Rating: " + rating + "/5"));
                 }
             }
             else {
-                String message = "Request ended unexpectedly\n" +
+                Log.e("JSONRequestError",
                         "Status: " + result.get("status") + "\n" +
-                        "Message: " + result.get("error_message");
-                Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
+                        "Message: " + result.get("error_message"));
+
+                Toast.makeText(getBaseContext(), "Request ends unexpectedly",
+                        Toast.LENGTH_SHORT).show();
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
             Log.e("gplace", "parseLocationResult: Error=" + e.getMessage());
+
+            Toast.makeText(this,
+                    "Unexpected exception in respond from server", Toast.LENGTH_SHORT).show();
         }
     }
 
-    /**
-     * Enables the My Location layer if the fine location permission has been granted.
-     */
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -280,8 +273,9 @@ public class MapActivity extends AppCompatActivity implements
     }
 
     private void showMissingPermissionsError(ArrayList<String> permissionsDenied) {
-        String message = "The following permissions denied: " + permissionsDenied +
+        String message = "The following permissions denied:\n" + permissionsDenied +
                 "\nPlease allow all permissions to runs this task properly";
+
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }
